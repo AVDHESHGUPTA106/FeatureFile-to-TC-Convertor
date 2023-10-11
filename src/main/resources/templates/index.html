@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0" />
+	<title>Git PR Report Generator</title>
+	<link th:rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+	<meta charset="UTF-8" />
+	<link th:rel="stylesheet" th:href="@{assets/daterangepicker/daterangepicker.css}" />
+	<link th:rel="stylesheet" th:href="@{webjars/bootstrap/4.3.1/css/bootstrap.min.css} " />
+	<link th:rel="stylesheet" th:href="@{webjars/font-awesome/5.11.2/css/all.css} " />
+	<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+	<style>
+		hr {
+			border-top: 6px double rgb(128, 0, 0);
+		}
+
+		.error {
+			color: red;
+		}
+
+		body {
+			zoom: 90%;
+		}
+	</style>
+
+</head>
+
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid" style="max-width: 800px; margin: 0 auto;">
+		<div class="col-lg-8">
+			<h1>Git PR Report Generator</h1>
+			<hr />
+		</div>
+
+		<div class="row">
+			<div class="col-lg-8">
+
+				<form method="post" th:object="${remoteRequest}" th:action="@{/authenticate}">
+					<div class="form-group">
+						<label for="username">Git Repository URL</label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="url" autocomplete="off" th:field="*{url}"
+								required="required"
+								placeholder="Enter git url... {https://github.anaplan.com/xxx/xxxxxx.git}" />
+							<div class="input-group-append">
+								<span class="input-group-text"><i class="fas fa-link"></i></span>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="password">Git Access Token</label>
+						<div class="input-group" id="show_hide_password">
+							<input type="password" class="form-control" id="password" autocomplete="off"
+								th:field="*{password}" required="required"
+								placeholder="Enter access token... {ghp_xxxxxxxxxxxxxxxxxxxx}" />
+							<div class="input-group-append">
+								<span class="input-group-text"><i class="fa fa-eye-slash" aria-hidden="true"></i></span>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="dateRange">Date Range</label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="dateRange" autocomplete="off" />
+							<div class="input-group-append">
+								<span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+							</div>
+						</div>
+
+						<input type="hidden" name="dateFrom" th:field="*{dateFrom}" />
+						<input type="hidden" name="dateTo" th:field="*{dateTo}" />
+					</div>
+
+					<div th:if="${#fields.hasErrors('global')}">
+						<div class="alert alert-secondary alert-dismissible fade show text-center message mt-3"
+							role="alert">
+							<p th:each="err : ${#fields.errors('global')}" th:text="${err}" class="error" />
+							<button type="button" class="close btn-sm close-error" data-dismiss="alert"
+								aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+					</div>
+
+					<button class="btn btn-primary btn-submit" type="submit">
+						<span th:unless="${#fields.hasErrors('global')}" class="spinner-grow spinner-grow-sm"
+							role="status" aria-hidden="true"></span>
+						<span th:if="${#fields.hasErrors('global')}" class="spinner-grow spinner-grow-sm" role="status"
+							aria-hidden="true"></span>
+						Validate & Download Report</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div th:replace="fragments/footer :: footer"></div>
+
+	<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+	<script th:src="@{/webjars/popper.js/umd/popper.min.js}"></script>
+	<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+	<script th:src="@{assets/moment/moment.min.js}"></script>
+	<script th:src="@{assets/daterangepicker/daterangepicker.js}"></script>
+
+	<script>
+		$('.spinner-grow').hide();
+		$('.btn-submit').css('pointer-events','');
+		var $dateRange = $('#dateRange');
+
+		$dateRange.daterangepicker();
+		$dateRange.on('apply.daterangepicker', function (ev, picker) {
+			$('input[name="dateFrom"]').val(picker.startDate.format('DD/MM/YYYY'));
+			$('input[name="dateTo"]').val(picker.endDate.format('DD/MM/YYYY'));
+		});
+		$dateRange.click(); $('.applyBtn').click();
+		var cookieTimer = undefined;
+		$('.btn-submit').on('click', function () {
+			$('.close-error').click();
+			$('.spinner-grow').show();
+			$(this).css('pointer-events','none');
+			//watch the local Cookies to see when the download ID has been updated by the response headers.
+			if(typeof cookieTimer == 'undefined')cookieTimer = setInterval(checkCookies, 500);
+		});
+
+		//search for the name-value pattern with the above ID.
+		var cookiePattern = new RegExp(("downloadID=" + 'GitPRReport'), "i");
+
+		//check the local cookies for an update.
+		function checkCookies() {
+			// If the local cookies have been updated
+			if (document.cookie.search(cookiePattern) >= 0 && typeof cookieTimer != 'undefined') {
+				clearInterval(cookieTimer);
+				cookieTimer = undefined;
+				$('.spinner-grow').hide();
+				$('.btn-submit').css('pointer-events','');
+				document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+			}
+		}
+
+	</script>
+
+</body>
+
+</html>

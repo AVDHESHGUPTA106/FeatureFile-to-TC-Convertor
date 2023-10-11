@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="ISO-8859-1">
+  <title>Git Report</title>
+  <meta charset="UTF-8" />
+  <link th:rel="stylesheet" th:href="@{webjars/bootstrap/4.3.1/css/bootstrap.min.css} " />
+  <link th:rel="stylesheet" th:href="@{webjars/font-awesome/5.11.2/css/all.css} " />
+  <style>
+		hr {
+			border-top: 6px double rgb(128, 0, 0);
+		}
+	</style>
+
+</head>
+
+<body>
+<div class="container">
+  <div class="col-lg-8">
+    <h1>Git Report Generation</h1>
+    <hr/>
+  </div>
+
+  <!--		<h1>Settings</h1>-->
+  <!--		<div class="alert alert-primary" role="alert" th:text="${success}" th:if="${success}"></div>-->
+  <!--		<div class="alert alert-danger" role="alert" th:text="${error}" th:if="${error}"></div>-->
+  <div class="row">
+    <div class="col-lg-8" >
+
+      <form method="get" th:object="${remoteRequest}" th:action="@{/generate-report-from-remote}">
+<!--        <div class="form-group">-->
+<!--          <label for="username">Git Repository URL</label>-->
+<!--          <div class="input-group">-->
+<!--            <input type="text" class="form-control" id="url" autocomplete="off" th:field="*{url}"  required="required"/>-->
+<!--            <div class="input-group-append">-->
+<!--              <span class="input-group-text"><i class="fas fa-link"></i></span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        &lt;!&ndash;					<div class="form-group">&ndash;&gt;-->
+<!--        &lt;!&ndash;						<label for="username">Git Branch Name</label>&ndash;&gt;-->
+<!--        &lt;!&ndash;						<div class="input-group">&ndash;&gt;-->
+<!--        &lt;!&ndash;							<input type="text" class="form-control" id="branch" autocomplete="off"&ndash;&gt;-->
+<!--        &lt;!&ndash;								th:field="*{branch}" />&ndash;&gt;-->
+<!--        &lt;!&ndash;							<div class="input-group-append">&ndash;&gt;-->
+<!--        &lt;!&ndash;								<span class="input-group-text"><i class="fas fa-code-branch"></i></span>&ndash;&gt;-->
+<!--        &lt;!&ndash;							</div>&ndash;&gt;-->
+<!--        &lt;!&ndash;						</div>&ndash;&gt;-->
+<!--        &lt;!&ndash;					</div>&ndash;&gt;-->
+<!--        &lt;!&ndash;					<div class="form-group">&ndash;&gt;-->
+<!--        &lt;!&ndash;						<label for="username">Git Username</label>&ndash;&gt;-->
+<!--        &lt;!&ndash;						<div class="input-group">&ndash;&gt;-->
+<!--        &lt;!&ndash;							<input type="text" class="form-control" id="username" autocomplete="off"&ndash;&gt;-->
+<!--        &lt;!&ndash;								th:field="*{userName}" />&ndash;&gt;-->
+<!--        &lt;!&ndash;							<div class="input-group-append">&ndash;&gt;-->
+<!--        &lt;!&ndash;								<span class="input-group-text"><i class="fas fa-user-lock"></i></span>&ndash;&gt;-->
+<!--        &lt;!&ndash;							</div>&ndash;&gt;-->
+<!--        &lt;!&ndash;						</div>&ndash;&gt;-->
+<!--        &lt;!&ndash;					</div>&ndash;&gt;-->
+<!--        <div class="form-group">-->
+<!--          <label for="password">Git Access Token</label>-->
+<!--          <div class="input-group" id="show_hide_password">-->
+<!--            <input type="password" class="form-control" id="password" autocomplete="off"-->
+<!--                   th:field="*{password}" required="required" />-->
+<!--            <div class="input-group-append">-->
+<!--              <span class="input-group-text"><i class="fa fa-eye-slash" aria-hidden="true"></i></span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        					<div class="alert alert-primary" role="alert" th:text="${success}" th:if="${success}"></div>-->
+<!--        					<div class="alert alert-danger" role="alert" th:text="${error}" th:if="${error}"></div>-->
+<!--        <div th:if="${#fields.hasErrors('global')}">-->
+<!--          <p th:each="err : ${#fields.errors('global')}" th:text="${err}" class="error" />-->
+<!--        </div>-->
+        <button class="btn btn-primary" type="submit">Download Git Report</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>

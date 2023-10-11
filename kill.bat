@@ -1,0 +1,1 @@
+FOR /F "tokens=5 delims= " %%P IN ('netstat -a -n -o ^| findstr :8080.*LISTENING') DO TaskKill /F /PID %%P
