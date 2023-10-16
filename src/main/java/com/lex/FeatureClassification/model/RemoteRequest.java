@@ -22,8 +22,6 @@ import lombok.Setter;
 public class RemoteRequest {
 	@NotEmpty(message = "Git URL Cant be Empty")
 	private String url;
-	private String branch;
-	private String userName;
 	@NotEmpty(message = "Access Token Cant be Empty")
 	private String password;
 	@DateTimeFormat(pattern = "dd/MM/yyyy")

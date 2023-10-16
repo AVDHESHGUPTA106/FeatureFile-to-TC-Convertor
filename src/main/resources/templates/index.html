@@ -38,7 +38,16 @@
 		<div class="row">
 			<div class="col-lg-8">
 
-				<form method="post" th:object="${remoteRequest}" th:action="@{/authenticate}">
+				<form method="post" th:object="${remoteRequest}" th:action="@{/genprreport}">
+					<div class="form-group">
+						<label for="formFileSm" class="form-label">Select Git Url Xls(x) File</label>
+						<div class="input-group">
+							<input class="form-control form-control" id="formFileSm" type="file" accept=".xls,.xlsx"/>
+							<div class="input-group-append">
+								<span class="input-group-text"><i class="fas fa-upload"></i></span>
+							</div>
+						</div>
+					</div>
 					<div class="form-group">
 						<label for="username">Git Repository URL</label>
 						<div class="input-group">
@@ -106,7 +115,7 @@
 
 	<script>
 		$('.spinner-grow').hide();
-		$('.btn-submit').css('pointer-events','');
+		$('.btn-submit').css('pointer-events', '');
 		var $dateRange = $('#dateRange');
 
 		$dateRange.daterangepicker();
@@ -119,9 +128,9 @@
 		$('.btn-submit').on('click', function () {
 			$('.close-error').click();
 			$('.spinner-grow').show();
-			$(this).css('pointer-events','none');
+			$(this).css('pointer-events', 'none');
 			//watch the local Cookies to see when the download ID has been updated by the response headers.
-			if(typeof cookieTimer == 'undefined')cookieTimer = setInterval(checkCookies, 500);
+			if (typeof cookieTimer == 'undefined') cookieTimer = setInterval(checkCookies, 500);
 		});
 
 		//search for the name-value pattern with the above ID.
@@ -134,8 +143,8 @@
 				clearInterval(cookieTimer);
 				cookieTimer = undefined;
 				$('.spinner-grow').hide();
-				$('.btn-submit').css('pointer-events','');
-				document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+				$('.btn-submit').css('pointer-events', '');
+				document.cookie.split(";").forEach(function (c) {document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");});
 			}
 		}
 

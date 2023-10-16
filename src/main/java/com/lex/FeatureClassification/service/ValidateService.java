@@ -33,7 +33,7 @@ public class ValidateService {
 			return "Error: Invalid Git Access Token";
 		}
 		if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-			return "Error: Git Repository Not Found";
+			return String.format("Error: Git Repository Not Found %s",remoteRequest.getUrl());
 		}
 		return response;
 	}

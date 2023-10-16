@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -17,6 +18,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.lex.FeatureClassification.model.PRComment;
@@ -26,7 +29,7 @@ public class GenerateExcel {
 
 	private static String[] columns = { "Raised By", "Reviewed By", "Repo Name", "PR Link", "PR Title", "From Branch",
 			"To Branch", "PR Status", "Creation Date", "PR Ageing", "PR Description", "PR Comment" };
-
+	
 	public static ByteArrayInputStream generateExcel(List<PRDetail> prDetailsList) {
 
 		try {
@@ -67,6 +70,17 @@ public class GenerateExcel {
 			childRowCellStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
 			childRowCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			setRowBorderStyle(childRowCellStyle);
+			
+	        CellStyle linkStyle = workbook.createCellStyle(); 
+	        Font linkFont = workbook.createFont(); 
+	        linkFont.setUnderline(XSSFFont.U_SINGLE); 
+	        linkFont.setColor(IndexedColors.BLUE.index); 
+	        linkFont.setFontHeightInPoints((short) 10);
+	        linkFont.setItalic(true);
+	        linkStyle.setFont(linkFont); 
+	        setRowAlignment(linkStyle);
+	        setRowBorderStyle(linkStyle);
+	  
 
 			Row headerRow = sheet.createRow(0);
 
@@ -83,7 +97,7 @@ public class GenerateExcel {
 			for (PRDetail prDetail : prDetailsList) {
 
 				prepareExcelCell(sheet, rowCellStyle, prDetail, rowNum++, prDetail.getPrUserName(),
-						prDetail.getPrCreationDate(), prDetail.getPrComments(), false);
+						prDetail.getPrCreationDate(), prDetail.getPrComments(), false, linkStyle);
 
 				// Fill Child Sheet
 				List<PRComment> prCommentList = prDetail.getPrCommentList();
@@ -92,7 +106,7 @@ public class GenerateExcel {
 						prDetail.setParent(false);
 						prepareExcelCell(sheet, prComment.isRvwComment() ? childRowCellStyle : childUsrRowCellStyle,
 								prDetail, rowNum++, prComment.getUserName(), prComment.getCreationDate(),
-								prComment.getPrComment(), prComment.isRvwComment());
+								prComment.getPrComment(), prComment.isRvwComment(), linkStyle);
 					}
 
 				}
@@ -140,9 +154,11 @@ public class GenerateExcel {
 	 * @param prUsrName
 	 * @param rvwComntDate
 	 * @param prRvwComnt
+	 * @param linkStyle 
+	 * @param link 
 	 */
 	private static void prepareExcelCell(Sheet sheet, CellStyle rowCellStyle, PRDetail prDetail, int rowNum,
-			String prUsrName, String rvwComntDate, String prRvwComnt, boolean isrvwComnt) {
+			String prUsrName, String rvwComntDate, String prRvwComnt, boolean isrvwComnt, CellStyle linkStyle) {
 		Row row = sheet.createRow(rowNum);
 		Cell zeroCell = row.createCell(0);
 		zeroCell.setCellValue(!isrvwComnt ? prUsrName : StringUtils.EMPTY);
@@ -158,7 +174,10 @@ public class GenerateExcel {
 
 		Cell thirdCell = row.createCell(3);
 		thirdCell.setCellValue(prDetail.getPrLink());
-		thirdCell.setCellStyle(rowCellStyle);
+		XSSFHyperlink link = (XSSFHyperlink)sheet.getWorkbook().getCreationHelper().createHyperlink(HyperlinkType.URL);
+        link.setAddress(prDetail.getPrLink()); 
+        thirdCell.setHyperlink((XSSFHyperlink)link); 
+        thirdCell.setCellStyle(linkStyle); 
 
 		Cell fourthCell = row.createCell(4);
 		fourthCell.setCellValue(prDetail.getPrTitle());
