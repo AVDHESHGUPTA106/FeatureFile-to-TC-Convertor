@@ -11,6 +11,7 @@
 	<link th:rel="stylesheet" th:href="@{webjars/bootstrap/4.3.1/css/bootstrap.min.css} " />
 	<link th:rel="stylesheet" th:href="@{webjars/font-awesome/5.11.2/css/all.css} " />
 	<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.0/xlsx.full.min.js"></script>
 	<style>
 		hr {
 			border-top: 6px double rgb(128, 0, 0);
@@ -42,7 +43,7 @@
 					<div class="form-group">
 						<label for="formFileSm" class="form-label">Select Git Url Xls(x) File</label>
 						<div class="input-group">
-							<input class="form-control form-control" id="formFileSm" type="file" accept=".xls,.xlsx"/>
+							<input class="form-control form-control" id="repo" name="repoList" type="file" accept=".xls,.xlsx" onchange="Upload()"/>
 							<div class="input-group-append">
 								<span class="input-group-text"><i class="fas fa-upload"></i></span>
 							</div>
@@ -147,6 +148,49 @@
 				document.cookie.split(";").forEach(function (c) {document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");});
 			}
 		}
+
+<!--Methode to read Excell file-->
+
+function Upload() {
+const fileUpload = (document.getElementById('repo'));
+console.log("Hello");
+const regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
+if (regex.test(fileUpload.value.toLowerCase())) {
+    let fileName = fileUpload.files[0].name;
+    if (typeof (FileReader) !== 'undefined') {
+        const reader = new FileReader();
+        if (reader.readAsBinaryString) {
+            reader.onload = (e) => {
+                processExcel(reader.result);
+            };
+            reader.readAsBinaryString(fileUpload.files[0]);
+        }
+    } else {
+        console.log("This browser does not support HTML5.");
+    }
+} else {
+    console.log("Please upload a valid Excel file.");
+}
+}
+
+function processExcel(data) {
+    const workbook = XLSX.read(data, {type: 'binary'});
+    const firstSheet = workbook.SheetNames[0];
+    const excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
+    console.log(excelRows);
+    let repoList="";
+    for(var row in excelRows)
+    {
+       var obj = JSON.parse(JSON.stringify(excelRows[row]));
+       console.log(obj["Git Repo"]);
+       if(row==0)
+         repoList = obj["Git Repo"];
+       else
+         repoList=repoList+";"+obj["Git Repo"];
+    }
+        console.log(repoList);
+        document.getElementById('url').value=repoList;
+    }
 
 	</script>
 

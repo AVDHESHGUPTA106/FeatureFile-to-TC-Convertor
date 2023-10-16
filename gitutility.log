@@ -1,0 +1,1 @@
+2023-10-16 20:19:02.591 ERROR 118800 --- [http-nio-8080-exec-4] c.l.F.c.FeatureClassificationController  : I/O error on GET request for "https://github.anaplan.com/api/v3/search/issues": github.anaplan.com; nested exception is java.net.UnknownHostException: github.anaplan.com

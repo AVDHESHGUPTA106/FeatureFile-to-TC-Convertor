@@ -52,6 +52,7 @@ public class FeatureClassificationController {
 	public Object generatePrExcelReport(@Valid @ModelAttribute(name = "remoteRequest") RemoteRequest remoteRequest,
 			BindingResult result, Model model) {
 		try {
+
 			List<String> gitUrlList = List.of(remoteRequest.getUrl().split(";"));
 			List<String> inValidGitUrl = gitUrlList.stream().filter(url -> !ValidateService.isValidGITRepo(url))
 					.collect(Collectors.toList());
