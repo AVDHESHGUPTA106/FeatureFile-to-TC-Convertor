@@ -28,4 +28,5 @@ public class RemoteRequest {
     private Date dateFrom;
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private Date dateTo;
+    private String repolist;
 }

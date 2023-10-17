@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lex.FeatureClassification.model.GitSheetModel;
 import com.lex.FeatureClassification.model.PRDetail;
 import com.lex.FeatureClassification.model.RemoteRequest;
 import com.lex.FeatureClassification.service.ReportGeneratorService;
@@ -53,18 +56,27 @@ public class FeatureClassificationController {
 			BindingResult result, Model model) {
 		try {
 
-			List<String> gitUrlList = List.of(remoteRequest.getUrl().split(";"));
-			List<String> inValidGitUrl = gitUrlList.stream().filter(url -> !ValidateService.isValidGITRepo(url))
+			ObjectMapper objectMapper = new ObjectMapper();
+			TypeReference<List<GitSheetModel>> listType = new TypeReference<List<GitSheetModel>>() {};
+			List<GitSheetModel> gitModelList = objectMapper.readValue(remoteRequest.getRepolist(), listType);
+			if(gitModelList.size() == 0) {
+				gitModelList = List.of(GitSheetModel.builder()
+						.gitRepoUrl(remoteRequest.getUrl())
+						.gitAccessToken(remoteRequest.getPassword()).build());
+			}
+			List<GitSheetModel> invalidGitModel = gitModelList.stream().filter(gsm -> !ValidateService.isValidGITRepo(gsm.getGitRepoUrl()))
 					.collect(Collectors.toList());
-			if (inValidGitUrl.size() != 0) {
+			if (invalidGitModel.size() != 0) {
+				List<String> invalidGitUrl = invalidGitModel.stream().map(gsm->gsm.getGitRepoUrl()).collect(Collectors.toList());
 				ObjectError error = new ObjectError("globalError",
-						String.format("Error: Invalid Git Repository %s", inValidGitUrl.toString()));
+						String.format("Error: Invalid Git Repository %s", invalidGitUrl.toString()));
 				result.addError(error);
 			} else {
 				List<PRDetail> prDetails = new ArrayList<>();
-				gitUrlList.forEach(url ->{
+				gitModelList.forEach(gsm ->{
 					try {
-						remoteRequest.setUrl(url);
+						remoteRequest.setUrl(gsm.getGitRepoUrl());
+						remoteRequest.setPassword(gsm.getGitAccessToken());
 						Object responseFrmGitUrl = validateService.validateNGetResponseFrmGitUrl(remoteRequest);
 						if (responseFrmGitUrl instanceof String && !responseFrmGitUrl.toString().isEmpty()) {
 							ObjectError error = new ObjectError("globalError", "Error: " + responseFrmGitUrl.toString());

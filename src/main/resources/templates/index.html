@@ -10,8 +10,6 @@
 	<link th:rel="stylesheet" th:href="@{assets/daterangepicker/daterangepicker.css}" />
 	<link th:rel="stylesheet" th:href="@{webjars/bootstrap/4.3.1/css/bootstrap.min.css} " />
 	<link th:rel="stylesheet" th:href="@{webjars/font-awesome/5.11.2/css/all.css} " />
-	<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.0/xlsx.full.min.js"></script>
 	<style>
 		hr {
 			border-top: 6px double rgb(128, 0, 0);
@@ -42,19 +40,25 @@
 				<form method="post" th:object="${remoteRequest}" th:action="@{/genprreport}">
 					<div class="form-group">
 						<label for="formFileSm" class="form-label">Select Git Url Xls(x) File</label>
-						<div class="input-group">
-							<input class="form-control form-control" id="repo" name="repoList" type="file" accept=".xls,.xlsx" onchange="Upload()"/>
+						[<a th:href="@{assets/sample/GitRepoSheet.xlsx}" download>Click to dowload sample file</a>]
+						<div class="input-group" id="file-upload">
+							<input class="form-control form-control" id="repo" name="repoList" type="file"
+								accept=".xls,.xlsx" onchange="uploadExcel()" />
 							<div class="input-group-append">
-								<span class="input-group-text"><i class="fas fa-upload"></i></span>
+								<span class="input-group-text"><i class="fas fa-upload" style="cursor: pointer;"
+										title="Click to clear the selection"></i></span>
 							</div>
 						</div>
 					</div>
+					<h6><b>Note:-</b>Either select excel file or input entry of repo url & access token</h6>
 					<div class="form-group">
 						<label for="username">Git Repository URL</label>
 						<div class="input-group">
 							<input type="text" class="form-control" id="url" autocomplete="off" th:field="*{url}"
 								required="required"
 								placeholder="Enter git url... {https://github.anaplan.com/xxx/xxxxxx.git}" />
+							<input type="hidden" class="form-control" id="repolist" autocomplete="off"
+								th:field="*{repolist}" />
 							<div class="input-group-append">
 								<span class="input-group-text"><i class="fas fa-link"></i></span>
 							</div>
@@ -113,10 +117,14 @@
 	<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
 	<script th:src="@{assets/moment/moment.min.js}"></script>
 	<script th:src="@{assets/daterangepicker/daterangepicker.js}"></script>
+	<script th:src="@{assets/xlsx/xlsx.full.min.js}"></script>
+	<script th:src="@{assets/xlsx/process.js}"></script>
 
 	<script>
 		$('.spinner-grow').hide();
 		$('.btn-submit').css('pointer-events', '');
+		$('#url').val("").prop('disabled', false);
+		$('#password').val('').prop('disabled', false);
 		var $dateRange = $('#dateRange');
 
 		$dateRange.daterangepicker();
@@ -127,11 +135,13 @@
 		$dateRange.click(); $('.applyBtn').click();
 		var cookieTimer = undefined;
 		$('.btn-submit').on('click', function () {
-			$('.close-error').click();
-			$('.spinner-grow').show();
-			$(this).css('pointer-events', 'none');
-			//watch the local Cookies to see when the download ID has been updated by the response headers.
-			if (typeof cookieTimer == 'undefined') cookieTimer = setInterval(checkCookies, 500);
+			if ($('#url').val() != '' && $('#password').val() != '') {
+				$('.close-error').click();
+				$('.spinner-grow').show();
+				$(this).css('pointer-events', 'none');
+				//watch the local Cookies to see when the download ID has been updated by the response headers.
+				if (typeof cookieTimer == 'undefined') cookieTimer = setInterval(checkCookies, 500);
+			}
 		});
 
 		//search for the name-value pattern with the above ID.
@@ -148,50 +158,6 @@
 				document.cookie.split(";").forEach(function (c) {document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");});
 			}
 		}
-
-<!--Methode to read Excell file-->
-
-function Upload() {
-const fileUpload = (document.getElementById('repo'));
-console.log("Hello");
-const regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
-if (regex.test(fileUpload.value.toLowerCase())) {
-    let fileName = fileUpload.files[0].name;
-    if (typeof (FileReader) !== 'undefined') {
-        const reader = new FileReader();
-        if (reader.readAsBinaryString) {
-            reader.onload = (e) => {
-                processExcel(reader.result);
-            };
-            reader.readAsBinaryString(fileUpload.files[0]);
-        }
-    } else {
-        console.log("This browser does not support HTML5.");
-    }
-} else {
-    console.log("Please upload a valid Excel file.");
-}
-}
-
-function processExcel(data) {
-    const workbook = XLSX.read(data, {type: 'binary'});
-    const firstSheet = workbook.SheetNames[0];
-    const excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
-    console.log(excelRows);
-    let repoList="";
-    for(var row in excelRows)
-    {
-       var obj = JSON.parse(JSON.stringify(excelRows[row]));
-       console.log(obj["Git Repo"]);
-       if(row==0)
-         repoList = obj["Git Repo"];
-       else
-         repoList=repoList+";"+obj["Git Repo"];
-    }
-        console.log(repoList);
-        document.getElementById('url').value=repoList;
-    }
-
 	</script>
 
 </body>
