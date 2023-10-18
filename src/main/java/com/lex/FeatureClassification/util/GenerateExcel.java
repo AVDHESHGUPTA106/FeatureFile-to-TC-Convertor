@@ -27,7 +27,7 @@ import com.lex.FeatureClassification.model.PRDetail;
 
 public class GenerateExcel {
 
-	private static String[] columns = { "Raised By", "Reviewed By", "Repo Name", "PR Link", "PR Title", "From Branch",
+	private static String[] columns = { "Raised By", "Reviewed By", "Repo Name", "PR Number", "PR Link", "PR Title", "From Branch",
 			"To Branch", "PR Status", "Creation Date", "PR Ageing", "PR Description", "PR Comment" };
 	
 	public static ByteArrayInputStream generateExcel(List<PRDetail> prDetailsList) {
@@ -60,15 +60,15 @@ public class GenerateExcel {
 			CellStyle childUsrRowCellStyle = workbook.createCellStyle();
 			childUsrRowCellStyle.setFont(childFont);
 			setRowAlignment(childUsrRowCellStyle);
-			childUsrRowCellStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
-			childUsrRowCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			//childUsrRowCellStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+			//childUsrRowCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			setRowBorderStyle(childUsrRowCellStyle);
 
 			CellStyle childRowCellStyle = workbook.createCellStyle();
 			childRowCellStyle.setFont(childFont);
 			setRowAlignment(childRowCellStyle);
-			childRowCellStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
-			childRowCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			//childRowCellStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+			//childRowCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			setRowBorderStyle(childRowCellStyle);
 			
 	        CellStyle linkStyle = workbook.createCellStyle(); 
@@ -171,48 +171,50 @@ public class GenerateExcel {
 		Cell secondCell = row.createCell(2);
 		secondCell.setCellValue(prDetail.getRepoName());
 		secondCell.setCellStyle(rowCellStyle);
+		
+		Cell prNumberCell = row.createCell(3);
+		prNumberCell.setCellValue(prDetail.getPrNumber());
+		prNumberCell.setCellStyle(rowCellStyle);
 
-		Cell thirdCell = row.createCell(3);
+		Cell thirdCell = row.createCell(4);
 		thirdCell.setCellValue(prDetail.getPrLink());
 		XSSFHyperlink link = (XSSFHyperlink)sheet.getWorkbook().getCreationHelper().createHyperlink(HyperlinkType.URL);
         link.setAddress(prDetail.getPrLink()); 
         thirdCell.setHyperlink((XSSFHyperlink)link); 
         thirdCell.setCellStyle(linkStyle); 
 
-		Cell fourthCell = row.createCell(4);
+		Cell fourthCell = row.createCell(5);
 		fourthCell.setCellValue(prDetail.getPrTitle());
 		fourthCell.setCellStyle(rowCellStyle);
 
-		Cell fifthCell = row.createCell(5);
+		Cell fifthCell = row.createCell(6);
 		fifthCell.setCellValue(prDetail.getPrFrmBranchName());
 		fifthCell.setCellStyle(rowCellStyle);
 
-		Cell sixthCell = row.createCell(6);
+		Cell sixthCell = row.createCell(7);
 		sixthCell.setCellValue(prDetail.getPrToBranchName());
 		sixthCell.setCellStyle(rowCellStyle);
 
-		Cell seventhCell = row.createCell(7);
+		Cell seventhCell = row.createCell(8);
 		seventhCell.setCellValue(prDetail.getPrStatus());
 		seventhCell.setCellStyle(rowCellStyle);
 
-		Cell eightCell = row.createCell(8);
+		Cell eightCell = row.createCell(9);
 		eightCell.setCellValue(rvwComntDate);
 		eightCell.setCellStyle(rowCellStyle);
 
-		Cell ninthCell = row.createCell(9);
+		Cell ninthCell = row.createCell(10);
 		ninthCell.setCellValue(prDetail.isParent() ? prDetail.getPrAgeing() : StringUtils.EMPTY);
 		ninthCell.setCellStyle(rowCellStyle);
 
-		Cell tenthCell = row.createCell(10);
+		Cell tenthCell = row.createCell(11);
 		tenthCell.setCellValue(prDetail.isParent() ? prDetail.getPrDescription() : StringUtils.EMPTY);
 		tenthCell.setCellStyle(rowCellStyle);
 
-		Cell cell = row.createCell(11);
+		Cell cell = row.createCell(12);
 		cell.setCellValue(prRvwComnt != "null" ? prRvwComnt : StringUtils.EMPTY);
 		cell.setCellStyle(rowCellStyle);// Wrapping text
 
 		sheet.setDefaultColumnWidth(20);
-		sheet.autoSizeColumn(10);
-		sheet.autoSizeColumn(11);
 	}
 }

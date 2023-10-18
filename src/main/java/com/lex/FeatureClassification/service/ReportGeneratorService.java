@@ -121,10 +121,16 @@ public class ReportGeneratorService {
 					.sorted(comparator).collect(Collectors.toList());
 
 			PRDetailBuilder prDetailBuilder = PRDetail.builder()
-					.prUserName(obj.getJSONObject("user").getString("login")).repoName(repoName)
-					.prDescription(!"null".equals(ObjectUtils.defaultIfNull(obj.get("body"), "").toString())?obj.getString("body"):StringUtils.EMPTY).prLink(obj.getString("html_url"))
-					.prTitle(obj.getString("title")).prCreationDate(obj.getString("created_at"))
-					.prStatus(obj.getString("state")).prComments(initialComment).prAgeing(prAgeing)
+					.prUserName(obj.getJSONObject("user").getString("login"))
+					.repoName(repoName)
+					.prDescription(!"null".equals(ObjectUtils.defaultIfNull(obj.get("body"), "").toString())?obj.getString("body"):StringUtils.EMPTY)
+					.prNumber(obj.getLong("number"))
+					.prLink(obj.getString("html_url"))
+					.prTitle(obj.getString("title"))
+					.prCreationDate(obj.getString("created_at"))
+					.prStatus(obj.getString("state"))
+					.prComments(initialComment)
+					.prAgeing(prAgeing)
 					.prCommentList(prCombinedCommentList).isParent(true);
 
 			JSONObject prJsonObject = new JSONObject(getPrDetailsData(pullsUrl, remoteRequest.getPassword()));

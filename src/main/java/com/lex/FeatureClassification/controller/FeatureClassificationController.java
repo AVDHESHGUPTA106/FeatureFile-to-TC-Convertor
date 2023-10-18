@@ -64,8 +64,8 @@ public class FeatureClassificationController {
 				};
 				gitModelList = objectMapper.readValue(repolist, listType);
 			} else {
-				gitModelList = List.of(GitSheetModel.builder().gitRepoUrl(remoteRequest.getUrl())
-						.gitAccessToken(remoteRequest.getPassword()).build());
+				gitModelList = List.of(GitSheetModel.builder().gitRepoUrl(remoteRequest.getUrl().trim())
+						.gitAccessToken(remoteRequest.getPassword().trim()).build());
 			}
 			List<GitSheetModel> invalidGitModel = gitModelList.stream()
 					.filter(gsm -> !ValidateService.isValidGITRepo(gsm.getGitRepoUrl())).collect(Collectors.toList());
@@ -80,8 +80,8 @@ public class FeatureClassificationController {
 				List<Object> responses = new ArrayList<>();
 				gitModelList.forEach(gsm -> {
 					try {
-						remoteRequest.setUrl(gsm.getGitRepoUrl());
-						remoteRequest.setPassword(gsm.getGitAccessToken());
+						remoteRequest.setUrl(gsm.getGitRepoUrl().trim());
+						remoteRequest.setPassword(gsm.getGitAccessToken().trim());
 						Object responseFrmGitUrl = validateService.validateNGetResponseFrmGitUrl(remoteRequest);
 						if (responseFrmGitUrl instanceof String && !responseFrmGitUrl.toString().isEmpty()) {
 							ObjectError error = new ObjectError("globalError",

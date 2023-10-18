@@ -10,6 +10,7 @@ import lombok.Data;
 public class PRDetail {
 	private String prUserName;
 	private String repoName;
+	private Long prNumber;
 	private String prLink;
 	private String prTitle;
 	private String prCreationDate;
