@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class FeatureClassificationController {
 
 	@Autowired
 	ReportGeneratorService reportGeneratorService;
-	
+
 	@Autowired
 	ValidateService validateService;
 
@@ -55,45 +56,64 @@ public class FeatureClassificationController {
 	public Object generatePrExcelReport(@Valid @ModelAttribute(name = "remoteRequest") RemoteRequest remoteRequest,
 			BindingResult result, Model model) {
 		try {
-
-			ObjectMapper objectMapper = new ObjectMapper();
-			TypeReference<List<GitSheetModel>> listType = new TypeReference<List<GitSheetModel>>() {};
-			List<GitSheetModel> gitModelList = objectMapper.readValue(remoteRequest.getRepolist(), listType);
-			if(gitModelList.size() == 0) {
-				gitModelList = List.of(GitSheetModel.builder()
-						.gitRepoUrl(remoteRequest.getUrl())
+			String repolist = remoteRequest.getRepolist();
+			List<GitSheetModel> gitModelList = null;
+			if (StringUtils.isNotBlank(repolist)) {
+				ObjectMapper objectMapper = new ObjectMapper();
+				TypeReference<List<GitSheetModel>> listType = new TypeReference<List<GitSheetModel>>() {
+				};
+				gitModelList = objectMapper.readValue(repolist, listType);
+			} else {
+				gitModelList = List.of(GitSheetModel.builder().gitRepoUrl(remoteRequest.getUrl())
 						.gitAccessToken(remoteRequest.getPassword()).build());
 			}
-			List<GitSheetModel> invalidGitModel = gitModelList.stream().filter(gsm -> !ValidateService.isValidGITRepo(gsm.getGitRepoUrl()))
-					.collect(Collectors.toList());
+			List<GitSheetModel> invalidGitModel = gitModelList.stream()
+					.filter(gsm -> !ValidateService.isValidGITRepo(gsm.getGitRepoUrl())).collect(Collectors.toList());
 			if (invalidGitModel.size() != 0) {
-				List<String> invalidGitUrl = invalidGitModel.stream().map(gsm->gsm.getGitRepoUrl()).collect(Collectors.toList());
+				List<String> invalidGitUrl = invalidGitModel.stream().map(gsm -> gsm.getGitRepoUrl())
+						.collect(Collectors.toList());
 				ObjectError error = new ObjectError("globalError",
 						String.format("Error: Invalid Git Repository %s", invalidGitUrl.toString()));
 				result.addError(error);
 			} else {
 				List<PRDetail> prDetails = new ArrayList<>();
-				gitModelList.forEach(gsm ->{
+				List<Object> responses = new ArrayList<>();
+				gitModelList.forEach(gsm -> {
 					try {
 						remoteRequest.setUrl(gsm.getGitRepoUrl());
 						remoteRequest.setPassword(gsm.getGitAccessToken());
 						Object responseFrmGitUrl = validateService.validateNGetResponseFrmGitUrl(remoteRequest);
 						if (responseFrmGitUrl instanceof String && !responseFrmGitUrl.toString().isEmpty()) {
-							ObjectError error = new ObjectError("globalError", "Error: " + responseFrmGitUrl.toString());
+							ObjectError error = new ObjectError("globalError",
+									"Error: " + responseFrmGitUrl.toString());
 							result.addError(error);
-						}else if(!result.hasErrors()&& responseFrmGitUrl instanceof ResponseEntity) {
-							prDetails.addAll(reportGeneratorService.getPRDetails(remoteRequest, responseFrmGitUrl));
+						} else if (!result.hasErrors() && responseFrmGitUrl instanceof ResponseEntity) {
+							responses.add(responseFrmGitUrl);
 						}
 					} catch (URISyntaxException e) {
 						ObjectError error = new ObjectError("globalError", "Error: " + e.getMessage());
 						result.addError(error);
 					}
 				});
-				if (prDetails.size() == 0) {
-					ObjectError error = new ObjectError("globalError",
-							String.format("Info: PR comment(s) are not found for selected date range %s - %s", remoteRequest.getDateFrom(), remoteRequest.getDateTo()));
-					result.addError(error);
-				} else return reportGeneratorService.generatePRExcelSheet(prDetails);
+				if (!result.hasErrors()) {
+					responses.forEach(res -> {
+						try {
+							prDetails.addAll(reportGeneratorService.getPRDetails(remoteRequest, res));
+						} catch (URISyntaxException e) {
+							ObjectError error = new ObjectError("globalError", "Error: " + e.getMessage());
+							result.addError(error);
+						}
+					});
+				}
+				if (!result.hasErrors()) {
+					if (prDetails.size() == 0) {
+						ObjectError error = new ObjectError("globalError",
+								String.format("Info: PR comment(s) are not found for selected date range %s - %s",
+										remoteRequest.getDateFrom(), remoteRequest.getDateTo()));
+						result.addError(error);
+					} else
+						return reportGeneratorService.generatePRExcelSheet(prDetails);
+				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());

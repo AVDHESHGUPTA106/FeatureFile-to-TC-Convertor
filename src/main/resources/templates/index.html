@@ -10,6 +10,7 @@
 	<link th:rel="stylesheet" th:href="@{assets/daterangepicker/daterangepicker.css}" />
 	<link th:rel="stylesheet" th:href="@{webjars/bootstrap/4.3.1/css/bootstrap.min.css} " />
 	<link th:rel="stylesheet" th:href="@{webjars/font-awesome/5.11.2/css/all.css} " />
+	<link th:rel="stylesheet" th:href="@{/assets/izitoast/css/iziToast.css} " />
 	<style>
 		hr {
 			border-top: 6px double rgb(128, 0, 0);
@@ -117,14 +118,15 @@
 	<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
 	<script th:src="@{assets/moment/moment.min.js}"></script>
 	<script th:src="@{assets/daterangepicker/daterangepicker.js}"></script>
+	<script th:src="@{/assets/izitoast/js/iziToast.min.js}"></script>
 	<script th:src="@{assets/xlsx/xlsx.full.min.js}"></script>
 	<script th:src="@{assets/xlsx/process.js}"></script>
 
 	<script>
 		$('.spinner-grow').hide();
 		$('.btn-submit').css('pointer-events', '');
-		$('#url').val("").prop('disabled', false);
-		$('#password').val('').prop('disabled', false);
+		$('#url').val("").prop('readonly', false);
+		$('#password').val('').prop('readonly', false);
 		var $dateRange = $('#dateRange');
 
 		$dateRange.daterangepicker();
@@ -135,6 +137,7 @@
 		$dateRange.click(); $('.applyBtn').click();
 		var cookieTimer = undefined;
 		$('.btn-submit').on('click', function () {
+			iziToast.destroy();
 			if ($('#url').val() != '' && $('#password').val() != '') {
 				$('.close-error').click();
 				$('.spinner-grow').show();
@@ -155,6 +158,13 @@
 				cookieTimer = undefined;
 				$('.spinner-grow').hide();
 				$('.btn-submit').css('pointer-events', '');
+				iziToast.show({
+					title: 'Success',
+					message: 'Git PR report generated and downloaded successfully',
+					position: 'topRight',
+					timeout: 20000,
+					color: 'green'
+				});
 				document.cookie.split(";").forEach(function (c) {document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");});
 			}
 		}

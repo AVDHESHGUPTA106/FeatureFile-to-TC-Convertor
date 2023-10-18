@@ -30,7 +30,7 @@ public class ValidateService {
 		ResponseEntity<String> response = restTemplate.exchange(reqEntity, String.class);
 	
 		if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-			return "Error: Invalid Git Access Token";
+			return String.format("Invalid Git Access Token of git repository  %s",remoteRequest.getUrl());
 		}
 		if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
 			return String.format("Error: Git Repository Not Found %s",remoteRequest.getUrl());
